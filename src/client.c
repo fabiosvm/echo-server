@@ -7,15 +7,17 @@
 #include <string.h>
 #include "socket.h"
 
-#define HOST           "127.0.0.1"
-#define PORT            9000
-#define MESSAGE        "Hi!"
+#define DEFAULT_HOST    "127.0.0.1"
+#define DEFAULT_PORT    9000
+#define DEFAULT_MESSAGE "Hi!"
 #define MAX_MESSAGE_LEN 1023
 
 int main(int argc, char *argv[])
 {
-  (void) argc;
-  (void) argv;
+  char *host = argc > 1 ? argv[1] : DEFAULT_HOST;
+  int port = argc > 2 ? atoi(argv[2]) : 0;
+  port = port ? port : DEFAULT_PORT;
+  char *message = argc > 3 ? argv[3] : DEFAULT_MESSAGE;
 
   if (socket_startup())
   {
@@ -35,8 +37,8 @@ int main(int argc, char *argv[])
   struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_port = htons(PORT);
-  server_addr.sin_addr.s_addr = inet_addr(HOST);
+  server_addr.sin_port = htons(port);
+  server_addr.sin_addr.s_addr = inet_addr(host);
 
   if (connect(client, (struct sockaddr *) &server_addr, sizeof(server_addr)) == SOCKET_ERROR)
   {
@@ -46,10 +48,12 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
+  printf("Connected to %s:%d\n", host, port);
+
   char buffer[MAX_MESSAGE_LEN + 1];
   int nbytes;
 
-  strncpy(buffer, MESSAGE, MAX_MESSAGE_LEN);
+  strncpy(buffer, message, MAX_MESSAGE_LEN);
   nbytes = strlen(buffer);
 
   if ((nbytes = socket_send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
@@ -59,7 +63,7 @@ int main(int argc, char *argv[])
     socket_cleanup();
     return EXIT_FAILURE;
   }
-  printf("Sent %s\n", buffer);
+  printf("Sent: %s\n", buffer);
 
   if ((nbytes = socket_recv(client, buffer, MAX_MESSAGE_LEN, 0)) == SOCKET_ERROR)
   {
@@ -74,5 +78,6 @@ int main(int argc, char *argv[])
   socket_close(client);
   socket_cleanup();
 
+  printf("Done.\n");
   return EXIT_SUCCESS;
 }
