@@ -11,10 +11,3 @@ mkdir build && cd build
 cmake ..
 cmake --build .
 ```
-
-## Testing
-
-```
-cd build
-ctest .
-```

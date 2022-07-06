@@ -25,5 +25,7 @@ int socket_startup(void);
 int socket_cleanup(void);
 int socket_get_last_error(void);
 int socket_close(socket_t sock);
+int socket_send(socket_t sock, const void *buf, int len, int flags);
+int socket_recv(socket_t sock, void *buf, int len, int flags);
 
 #endif // SOCKET_H

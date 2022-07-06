@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "socket.h"
 
 #define PORT            9000
@@ -14,7 +15,7 @@ int main(int argc, char *argv[])
   (void) argc;
   (void) argv;
 
-	if (socket_startup() != 0)
+	if (socket_startup())
 	{
 		printf("Socket startup failed: %d\n", socket_get_last_error());
 		return EXIT_FAILURE;
@@ -29,17 +30,20 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
 	}
 
-  if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int)) < 0)
+  int on = 1;
+  if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == SOCKET_ERROR)
   {
     printf("Could not set socket option: %d\n", socket_get_last_error());
+    socket_close(server);
     socket_cleanup();
     return EXIT_FAILURE;
   }
- 
+
   struct sockaddr_in server_addr;
+  memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = INADDR_ANY;
 	server_addr.sin_port = htons(PORT);
+	server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	if (bind(server, (struct sockaddr *) &server_addr, sizeof(server_addr)) == SOCKET_ERROR)
 	{
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  if ((nbytes = recv(client, buffer, MAX_MESSAGE_LEN, 0)) == SOCKET_ERROR)
+  if ((nbytes = socket_recv(client, buffer, MAX_MESSAGE_LEN, 0)) == SOCKET_ERROR)
   {
     printf("Receive failed: %d\n", socket_get_last_error());
     socket_close(client);
@@ -82,7 +86,7 @@ int main(int argc, char *argv[])
   buffer[nbytes] = '\0';
   printf("Received: %s\n", buffer);
 
-  if ((nbytes = send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
+  if ((nbytes = socket_send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
   {
     printf("Send failed: %d\n", socket_get_last_error());
     socket_close(client);

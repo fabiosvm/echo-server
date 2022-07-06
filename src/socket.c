@@ -48,3 +48,36 @@ int socket_close(socket_t sock)
   #endif
   return status;
 }
+
+int socket_send(socket_t sock, const void *buf, int len, int flags)
+{
+  char *ptr = (char *) buf;
+  int total = 0;
+  while (total < len)
+  {
+    int n;
+#ifdef _WIN32
+    n = send(sock, ptr, len - total, flags);
+#else
+    n = (int) send(sock, ptr, len - total, flags);
+#endif
+    if (!n)
+      return total;
+    if (n == SOCKET_ERROR)
+      return SOCKET_ERROR;
+    total += n;
+    ptr += n;
+  }
+  return total;
+}
+
+int socket_recv(socket_t sock, void *buf, int len, int flags)
+{
+  int n;
+#ifdef _WIN32
+  n = recv(sock, (char *) buf, len, flags);
+#else
+  n = (int) recv(sock, buf, len, flags);
+#endif
+  return n;
+}

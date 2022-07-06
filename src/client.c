@@ -7,7 +7,9 @@
 #include <string.h>
 #include "socket.h"
 
+#define HOST           "127.0.0.1"
 #define PORT            9000
+#define MESSAGE        "Hi!"
 #define MAX_MESSAGE_LEN 1023
 
 int main(int argc, char *argv[])
@@ -15,7 +17,7 @@ int main(int argc, char *argv[])
   (void) argc;
   (void) argv;
 
-  if (socket_startup() != 0)
+  if (socket_startup())
   {
     printf("Socket startup failed: %d\n", socket_get_last_error());
     return EXIT_FAILURE;
@@ -31,9 +33,10 @@ int main(int argc, char *argv[])
   }
 
   struct sockaddr_in server_addr;
+  memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
   server_addr.sin_port = htons(PORT);
+  server_addr.sin_addr.s_addr = inet_addr(HOST);
 
   if (connect(client, (struct sockaddr *) &server_addr, sizeof(server_addr)) == SOCKET_ERROR)
   {
@@ -46,10 +49,10 @@ int main(int argc, char *argv[])
   char buffer[MAX_MESSAGE_LEN + 1];
   int nbytes;
 
-  strncpy(buffer, "Hi!", MAX_MESSAGE_LEN);
+  strncpy(buffer, MESSAGE, MAX_MESSAGE_LEN);
   nbytes = strlen(buffer);
 
-  if ((nbytes = send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
+  if ((nbytes = socket_send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
   {
     printf("Send failed: %d\n", socket_get_last_error());
     socket_close(client);
@@ -58,7 +61,7 @@ int main(int argc, char *argv[])
   }
   printf("Sent %s\n", buffer);
 
-  if ((nbytes = recv(client, buffer, MAX_MESSAGE_LEN, 0)) == SOCKET_ERROR)
+  if ((nbytes = socket_recv(client, buffer, MAX_MESSAGE_LEN, 0)) == SOCKET_ERROR)
   {
     printf("Recv failed: %d\n", socket_get_last_error());
     socket_close(client);
