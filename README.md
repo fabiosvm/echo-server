@@ -1,7 +1,7 @@
 
 # Echo Server
 
-A simple TCP echo server. The `echo-server` listens on port `9000` and echoes back any data received.
+A simple, and cross-platform TCP echo server. The `echo-server` listens on port `9000` and echoes back any data received.
 The `client` can be used to test the server.
 
 ## Building
