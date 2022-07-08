@@ -9,7 +9,8 @@ add_executable(${PROJECT_NAME}
 
 add_executable(echo-client
   src/client.c
-  src/socket.c)
+  src/socket.c
+  src/utils.c)
 
 if(WIN32)
   target_link_libraries(${PROJECT_NAME} ws2_32)

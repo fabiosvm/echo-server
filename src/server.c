@@ -7,6 +7,8 @@
 #include <string.h>
 #include "socket.h"
 
+#define IPV4_MAX_LEN 16
+
 #define DEFAULT_PORT    9000
 #define MAX_MESSAGE_LEN 1023
 
@@ -30,8 +32,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
 	}
 
-  int on = 1;
-  if (setsockopt(server, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == SOCKET_ERROR)
+  if (socket_set_option(server, SOL_SOCKET, SO_REUSEADDR, 1) == SOCKET_ERROR)
   {
     printf("Could not set socket option: %d\n", socket_get_last_error());
     socket_close(server);
@@ -79,7 +80,10 @@ int main(int argc, char *argv[])
       return EXIT_FAILURE;
     }
 
-    printf("Accepted connection from %s\n", inet_ntoa(client_addr.sin_addr));
+    char ip[IPV4_MAX_LEN + 1];
+    memset(ip, 0, sizeof(ip));
+    inet_ntop(AF_INET, &client_addr.sin_addr, ip, IPV4_MAX_LEN);
+    printf("Accepted connection from %s\n", ip);
 
     for (;;)
     {
@@ -88,7 +92,7 @@ int main(int argc, char *argv[])
 
       if ((nbytes = socket_recv(client, buffer, MAX_MESSAGE_LEN, 0)) == SOCKET_ERROR)
       {
-        printf("Receive failed: %d\n", socket_get_last_error());
+        printf("Recv failed: %d\n", socket_get_last_error());
         socket_close(client);
         socket_close(server);
         socket_cleanup();

@@ -49,6 +49,17 @@ int socket_close(socket_t sock)
   return status;
 }
 
+int socket_set_option(socket_t sock, int level, int opt, int value)
+{
+  int status = 0;
+  #ifdef _WIN32
+    status = setsockopt(sock, level, opt, (const char *) &value, sizeof(value));
+  #else
+    status = setsockopt(sock, level, opt, &value, sizeof(value));
+  #endif
+  return status;
+}
+
 int socket_send(socket_t sock, const void *buf, int len, int flags)
 {
   char *ptr = (char *) buf;

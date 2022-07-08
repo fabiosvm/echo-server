@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "socket.h"
+#include "utils.h"
 
 #define DEFAULT_HOST    "127.0.0.1"
 #define DEFAULT_PORT    9000
@@ -60,7 +61,7 @@ int main(int argc, char *argv[])
   char buffer[MAX_MESSAGE_LEN + 1];
   int nbytes;
 
-  strncpy(buffer, message, MAX_MESSAGE_LEN);
+  string_copy(buffer, message, MAX_MESSAGE_LEN);
   nbytes = (int) strlen(buffer);
 
   if ((nbytes = socket_send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
