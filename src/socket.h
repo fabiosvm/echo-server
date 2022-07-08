@@ -21,6 +21,10 @@
   #define SOCKET_ERROR   -1
 #endif
 
+#ifndef __APPLE__
+  #define socklen_t int
+#endif
+
 int socket_startup(void);
 int socket_cleanup(void);
 int socket_get_last_error(void);

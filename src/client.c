@@ -38,7 +38,14 @@ int main(int argc, char *argv[])
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
   server_addr.sin_port = htons(port);
-  server_addr.sin_addr.s_addr = inet_addr(host);
+
+  if (inet_pton(AF_INET, host, &server_addr.sin_addr) != 1)
+  {
+    printf("Could not convert host to IP: %d\n", socket_get_last_error());
+    socket_close(client);
+    socket_cleanup();
+    return EXIT_FAILURE;
+  }
 
   if (connect(client, (struct sockaddr *) &server_addr, sizeof(server_addr)) == SOCKET_ERROR)
   {
@@ -54,7 +61,7 @@ int main(int argc, char *argv[])
   int nbytes;
 
   strncpy(buffer, message, MAX_MESSAGE_LEN);
-  nbytes = strlen(buffer);
+  nbytes = (int) strlen(buffer);
 
   if ((nbytes = socket_send(client, buffer, nbytes, 0)) == SOCKET_ERROR)
   {
